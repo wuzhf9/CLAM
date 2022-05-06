@@ -41,7 +41,7 @@ def patching(WSI_object, **kwargs):
 	return file_path, patch_time_elapsed
 
 
-def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_dir, 
+def seg_and_patch(source, annotation, save_dir, patch_save_dir, mask_save_dir, stitch_save_dir, 
 				  patch_size = 256, step_size = 256, 
 				  seg_params = {'seg_level': -1, 'sthresh': 8, 'mthresh': 7, 'close': 4, 'use_otsu': False,
 				  'keep_ids': 'none', 'exclude_ids': 'none'},
@@ -101,6 +101,9 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 		# Inialize WSI
 		full_path = os.path.join(source, slide)
 		WSI_object = WholeSlideImage(full_path)
+		if 'tumor' in slide_id:
+			xml_path = os.path.join(annotation, '{}.xml'.format(slide_id))
+			WSI_object.initXML(xml_path)
 
 		if use_default_params:
 			current_vis_params = vis_params.copy()
@@ -226,6 +229,8 @@ def seg_and_patch(source, save_dir, patch_save_dir, mask_save_dir, stitch_save_d
 parser = argparse.ArgumentParser(description='seg and patch')
 parser.add_argument('--source', type = str,
 					help='path to folder containing raw wsi image files')
+parser.add_argument('--annotation', type = str, default='lesion_annotations',
+					help='path to folder containing annotation files')
 parser.add_argument('--step_size', type = int, default=256,
 					help='step_size')
 parser.add_argument('--patch_size', type = int, default=256,
@@ -262,6 +267,7 @@ if __name__ == '__main__':
 	print('stitch_save_dir: ', stitch_save_dir)
 	
 	directories = {'source': args.source, 
+				   'annotation': args.annotation,
 				   'save_dir': args.save_dir,
 				   'patch_save_dir': patch_save_dir, 
 				   'mask_save_dir' : mask_save_dir, 
